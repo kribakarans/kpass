@@ -24,17 +24,19 @@ enum kpass_err_t {
 };
 
 enum kpass_limits_t {
-	USERNAME_LEN  = 32,
-	PASSWD_LEN    = 32,
-	TIME_LEN      = 32,
-	TITLE_LEN     = 128,
+	USERNAME_LEN  = 64,
+	PASSWD_LEN    = 64,
+	TAG_LEN       = 64,
+	TIME_LEN      = 64,
+	NAME_LEN      = 128,
 	URL_LEN       = 512,
-	BUFF_MAX = 1024
+	BUFF_MAX      = 1024
 };
 
 typedef struct kpass_entry_st {
 	int  id;
-	char title[TITLE_LEN];
+	char tag[TAG_LEN];
+	char name[NAME_LEN];
 	char user[USERNAME_LEN];
 	char password[PASSWD_LEN];
 	char url[URL_LEN];

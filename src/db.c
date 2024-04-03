@@ -68,7 +68,7 @@ static int kpass_db_check(const char *path)
 			break;
 		}
 
-		query = "pragma integrity_check;";
+		query = "PRAGMA integrity_check;";
 		if (sqlite3_exec(db, query, cb_dbcheck, NULL, &err) != SQLITE_OK) {
 			logit("sqlite3_exec() failed: %s", err);
 			sqlite3_free(err);
@@ -124,9 +124,15 @@ int kpass_db_init(const char *path)
 			break;
 		}
 
-		query = "create table entries"
-		        "(id integer primary key, title text, user text, url text, password text, notes text,"
-		        "timestamp date default (datetime('now','localtime')));";
+		query = "CREATE TABLE KPASS_ENTRIES ("
+		        "ID        INTEGER PRIMARY KEY, "
+		        "TAG       TEXT, "
+		        "NAME      TEXT, "
+		        "USERNAME  TEXT, "
+		        "PASSWORD  TEXT, "
+		        "URL       TEXT, "
+		        "NOTES     TEXT, "
+		        "TIMESTAMP DATE DEFAULT (datetime('now','localtime')));";
 		if (sqlite3_exec(db, query, NULL, NULL, &err) != SQLITE_OK) {
 			logit("sqlite3_exec() failed: %s", err);
 			sqlite3_free(err);
