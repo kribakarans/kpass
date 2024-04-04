@@ -2,6 +2,7 @@
 #include "db.h"
 #include "kpass.h"
 #include "logit.h"
+#include "utils.h"
 
 #define return_if_invalid_id(x) \
 	do { \
@@ -169,6 +170,11 @@ int kpass_edit_entry(const int id)
 		fprintf(stdout, " Notes [%s]\n", entry->notes);
 		kpass_entry_set("   New Notes    : ", entry->notes, sizeof(entry->notes));
 
+		if (true != kpass_user_action()) {
+			retval = RETERR;
+			break;
+		}
+
 		retval = kpass_db_commit("UPDATE KPASS_ENTRIES set "
 		                         "TAG = '%q', "
 		                         "NAME = '%q', "
@@ -215,6 +221,11 @@ int kpass_delete_entry(const int id)
 
 		if (retval == 0) {
 			fprintf(stderr, "No such entry with index %d.\n", id);
+			retval = RETERR;
+			break;
+		}
+
+		if (true != kpass_user_action()) {
 			retval = RETERR;
 			break;
 		}

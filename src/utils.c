@@ -3,6 +3,7 @@
 #include "db.h"
 #include "kpass.h"
 #include "logit.h"
+#include "utils.h"
 #include "macros.h"
 
 void kpass_exit(void)
@@ -77,6 +78,23 @@ void print_version(void)
 	fprintf(stderr, "%s: Version %s - Password manager.\n", __prog__, __version__);
 
 	return;
+}
+
+bool kpass_user_action(void)
+{
+	char useropts[16] = {0};
+
+	printf("Are you sure to continue? (Y/N) ");
+	fgets(useropts, sizeof(useropts), stdin);
+	useropts[strlen(useropts) - 1] = '\0';
+
+	if ((useropts[0] == 'Y') || (useropts[0] == 'y')) {
+		return true;
+	}
+
+	printf("Aborted.\n");
+
+	return false;
 }
 
 /* EOF */
