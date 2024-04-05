@@ -7,7 +7,7 @@
 #define return_if_invalid_id(x) \
 	do { \
 		if (x <= 0) { \
-			fprintf(stderr, "Invalid entry index %d.\n", x); \
+			kpass_printf("Invalid entry index %d.", x); \
 			return RETERR; \
 		} \
 	} while(0);
@@ -18,11 +18,11 @@
 		retval = kpass_db_count("SELECT count(*) from KPASS_ENTRIES where ID = %d", x); \
 		logit("nitems: %d", retval); \
 		if (retval == RETERR) { \
-			logit("%s", "kpass_db_count() failed"); \
+			kpass_error("%s", "kpass_db_count() failed"); \
 			return RETERR; \
 		} \
 		if (retval == 0) { \
-			fprintf(stderr, "No such entry with index %d.\n", x); \
+			kpass_printf("No such entry with index %d.", x); \
 			return RETERR; \
 		} \
 	} while(0);
@@ -33,7 +33,7 @@ static kpass_entry_t *kpass_entry_init(void)
 
 	entry = (kpass_entry_t *)calloc(1, sizeof(*entry));
 	if (entry == NULL) {
-		logit("calloc() failed: %s", strerror(errno));
+		kpass_error("calloc() failed: %s", strerror(errno));
 		exit(RETERR);
 	}
 
@@ -51,15 +51,15 @@ static void kpass_entry_free(kpass_entry_t *entry)
 static void kpass_print_entry(kpass_entry_t *entry)
 {
 	if (entry == NULL) {
-		logit("%s", "entry is NULL");
+		kpass_error("%s", "entry is NULL");
 	} else {
-		logit("Id       : %d", entry->id);
-		logit("Tag      : %s", entry->tag);
-		logit("Name     : %s", entry->name);
-		logit("Username : %s", entry->user);
-		logit("Password : %s", entry->password);
-		logit("Url      : %s", entry->url);
-		logit("Notes    : %s", entry->notes);
+		kpass_printf("Id       : %d", entry->id);
+		kpass_printf("Tag      : %s", entry->tag);
+		kpass_printf("Name     : %s", entry->name);
+		kpass_printf("Username : %s", entry->user);
+		kpass_printf("Password : %s", entry->password);
+		kpass_printf("Url      : %s", entry->url);
+		kpass_printf("Notes    : %s", entry->notes);
 	}
 
 	return;
@@ -106,7 +106,7 @@ static int kpass_insert_entry(kpass_entry_t *entry)
 		retval = kpass_db_commit("INSERT into KPASS_ENTRIES(TAG, NAME, USERNAME, PASSWORD, URL, NOTES) VALUES ('%q','%q','%q','%q','%q','%q')",
 		                          entry->tag, entry->name, entry->user, entry->password, entry->url, entry->notes);
 		if (retval < 0) {
-			logit("%s", "failed to insert entry");
+			kpass_error("%s", "failed to insert entry");
 			break;
 		}
 
@@ -148,26 +148,24 @@ int kpass_edit_entry(const int id)
 		entry = kpass_entry_init();
 		retval = kpass_db_exec(cb_get_entry, entry, "SELECT * from KPASS_ENTRIES where ID = %d", id);
 
-		kpass_print_entry(entry);
+		kpass_printf("Update entry details:");
 
-		fprintf(stdout, "Update entry details:\n");
-
-		fprintf(stdout, " Tag [%s]\n", entry->tag);
+		kpass_printf(" Tag [%s]", entry->tag);
 		kpass_entry_set("   New Tag    : ", entry->tag, sizeof(entry->tag));
 
-		fprintf(stdout, " Name [%s]\n", entry->name);
+		kpass_printf(" Name [%s]", entry->name);
 		kpass_entry_set("   New Name    : ", entry->name, sizeof(entry->name));
 
-		fprintf(stdout, " Username [%s]\n", entry->user);
+		kpass_printf(" Username [%s]", entry->user);
 		kpass_entry_set("   New Username : ", entry->user, sizeof(entry->user));
 
-		fprintf(stdout, " Password [%s]\n", entry->password);
+		kpass_printf(" Password [%s]", entry->password);
 		kpass_entry_set("   New Password : ", entry->password, sizeof(entry->password));
 
-		fprintf(stdout, " Url [%s]\n", entry->url);
+		kpass_printf(" Url [%s]", entry->url);
 		kpass_entry_set("   New Url      : ", entry->url, sizeof(entry->url));
 
-		fprintf(stdout, " Notes [%s]\n", entry->notes);
+		kpass_printf(" Notes [%s]", entry->notes);
 		kpass_entry_set("   New Notes    : ", entry->notes, sizeof(entry->notes));
 
 		if (true != kpass_user_action()) {
@@ -190,7 +188,7 @@ int kpass_edit_entry(const int id)
 		                         entry->url,
 		                         entry->notes, id);
 		if (retval <= 0) {
-			logit("%s", "failed to insert entry");
+			kpass_error("%s", "failed to insert entry");
 			retval = RETERR;
 			break;
 		}
@@ -215,12 +213,12 @@ int kpass_delete_entry(const int id)
 		logit("nitems: %d", retval);
 
 		if (retval == RETERR) {
-			logit("%s", "kpass_db_count() failed");
+			kpass_error("%s", "kpass_db_count() failed");
 			break;
 		}
 
 		if (retval == 0) {
-			fprintf(stderr, "No such entry with index %d.\n", id);
+			kpass_printf("No such entry with index %d.", id);
 			retval = RETERR;
 			break;
 		}
@@ -232,11 +230,11 @@ int kpass_delete_entry(const int id)
 
 		retval = kpass_db_commit("DELETE from KPASS_ENTRIES where ID = %d", id);
 		if (retval < 0) {
-			logit("%s", "failed to insert entry");
+			kpass_error("%s", "failed to insert entry");
 			break;
 		}
 
-		fprintf(stdout, "Deleted entry %d.\n", id);
+		kpass_printf("Deleted entry %d.", id);
 
 		retval = RETSXS;
 	} while(0);
@@ -254,11 +252,11 @@ int kpass_add_entry(void)
 	do {
 		entry = kpass_entry_init();
 		if (entry == NULL) {
-			logit("%s", "kpass_entry_init() failed");
+			kpass_error("%s", "kpass_entry_init() failed");
 			break;
 		}
 
-		fprintf(stdout, "Enter new entry details:\n");
+		kpass_printf("Enter new entry details:");
 		kpass_entry_set(" Tag      : ", entry->tag,      sizeof(entry->tag));
 		kpass_entry_set(" Name     : ", entry->name,     sizeof(entry->name));
 		kpass_entry_set(" Username : ", entry->user,     sizeof(entry->user));
@@ -268,11 +266,11 @@ int kpass_add_entry(void)
 
 		retval = kpass_insert_entry(entry);
 		if (retval != RETSXS) {
-			logit("%s", "kpass_insert_entry() failed");
+			kpass_error("%s", "kpass_insert_entry() failed");
 			break;
 		}
 
-		fprintf(stdout, "Added new entry.\n");
+		kpass_printf("Added new entry.");
 		kpass_entry_free(entry);
 	} while(0);
 
@@ -285,22 +283,23 @@ static int cb_print_entry(void *data, int ncolumn, char **column_value, char **c
 {
 	int show_password = *(int *)data;
 
-	fprintf(stdout, "=====================================================================\n");
-	fprintf(stdout, "Id       : %s\n", column_value[0]);
-	fprintf(stdout, "Tag      : %s\n", column_value[1]);
-	fprintf(stdout, "Name     : %s\n", column_value[2]);
-	fprintf(stdout, "User     : %s\n", column_value[3]);
+	kpass_printf("=====================================================================");
+	kpass_printf("Id       : %s", column_value[0]);
+	kpass_printf("Tag      : %s", column_value[1]);
+	kpass_printf("Name     : %s", column_value[2]);
+	kpass_printf("User     : %s", column_value[3]);
 
-	if(show_password == 1)
-		fprintf(stdout, "Password : %s\n", column_value[4]);
-	else
-		fprintf(stdout, "Password : **********\n");
+	if (show_password == 1) {
+		kpass_printf("Password : %s", column_value[4]);
+	} else {
+		kpass_printf("Password : **********");
+	}
 
-	fprintf(stdout, "Url      : %s\n", column_value[5]);
-	fprintf(stdout, "Notes    : %s\n", column_value[6]);
-	fprintf(stdout, "Modified : %s\n", column_value[7]);
+	kpass_printf("Url      : %s", column_value[5]);
+	kpass_printf("Notes    : %s", column_value[6]);
+	kpass_printf("Modified : %s", column_value[7]);
 
-	fprintf(stdout, "=====================================================================\n");
+	kpass_printf("=====================================================================");
 
 	return 0;
 }
@@ -345,13 +344,13 @@ int kpass_grep_entries(const char *pattern)
 
 		logit("nitems: %d", retval);
 		if (retval == RETERR) {
-			logit("%s", "kpass_db_count() failed");
+			kpass_error("%s", "kpass_db_count() failed");
 			retval = RETERR;
 			break;
 		}
 
 		if (retval == 0) {
-			fprintf(stderr, "No match found.\n");
+			kpass_printf("No match found.");
 			retval = RETERR;
 			break;
 		}

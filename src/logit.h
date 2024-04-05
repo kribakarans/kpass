@@ -18,11 +18,28 @@
 			logit("retval: %d", retval); \
 	} while(0);
 
-#define logit(fmt, ...) \
+#define logit(...) \
 	do { \
-		if (kpass.debug) \
-			fprintf(stderr, "\r%d %17s:%-4d %25s() :: " fmt "\n", \
-			        getpid(), __FILE__, __LINE__, __func__, __VA_ARGS__); \
+		if (kpass.debug) { \
+			fprintf(stderr, "DEBUG %d %17s:%-4d %25s() :: ", \
+			        getpid(), __FILE__, __LINE__, __func__); \
+			fprintf(stderr, __VA_ARGS__); \
+			fprintf(stderr, "\n"); \
+		} \
+	} while(0);
+
+#define kpass_error(...) \
+	do { \
+		fprintf(stderr, "ERROR %d %17s:%-4d %25s() :: ", \
+		        getpid(), __FILE__, __LINE__, __func__); \
+		fprintf(stderr, __VA_ARGS__); \
+		fprintf(stderr, "\n"); \
+	} while(0);
+
+#define kpass_printf(...) \
+	do { \
+		fprintf(stdout, __VA_ARGS__); \
+		fprintf(stdout, "\n"); \
 	} while(0);
 
 #endif

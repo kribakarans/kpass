@@ -76,9 +76,9 @@ static void exit_if_redundant_mode(const char new_mode)
 	char ex_mode = kpass.mode;
 
 	if (ex_mode) {
-		fprintf(stderr, "Kpass: multiple operations selected (%s & %s)\n",
-		                 kpass_get_modename(ex_mode),
-		                 kpass_get_modename(new_mode));
+		kpass_printf("Kpass: multiple operations selected (%s & %s)",
+		                                 kpass_get_modename(ex_mode),
+		                               kpass_get_modename(new_mode));
 		exit(RETERR);
 	}
 
@@ -88,10 +88,6 @@ static void exit_if_redundant_mode(const char new_mode)
 int parse_cmdline(int argc, char **argv)
 {
 	int option = -1;
-	char *prog = NULL;
-
-	if (argv[0])
-		prog = basename(argv[0]);
 
 	while ((option = getopt_long(argc, argv, shortopts, longopts, NULL)) != -1) {
 		switch (option) {
@@ -153,14 +149,14 @@ int parse_cmdline(int argc, char **argv)
 				break;
 
 			case ':':
-				fprintf(stderr, "%s: option `-%c' requires an argument.\n", prog, optopt);
-				fprintf(stderr, "Try '%s --help' for more information.\n", prog);
+				kpass_printf("Kpass: option `-%c' requires an argument.", optopt);
+				kpass_printf("Try 'kpass --help' for more information.");
 				exit(RETERR);
 				break;
 
 			case '?': default:
-				fprintf(stderr, "%s: invalid option -- '%c'\n", prog, optopt);
-				fprintf(stderr, "Try '%s --help' for more information.\n", prog);
+				kpass_printf("Kpass: invalid option -- '%c'", optopt);
+				kpass_printf("Try 'kpass --help' for more information.");
 				exit(RETERR);
 				break;
 		}; /* switch(option) */
@@ -199,16 +195,16 @@ static int kpass_worker(const char mode)
 			break;
 
 		case IMPORT:
-			printf("Need to implement (%s)\n", kpass_get_modename(mode));
+			kpass_printf("Need to implement (%s)", kpass_get_modename(mode));
 			break;
 
 		case EXPORT:
-			printf("Need to implement (%s)\n", kpass_get_modename(mode));
+			kpass_printf("Need to implement (%s)", kpass_get_modename(mode));
 			break;
 
 		default:
-			fprintf(stderr, "Kpass: invalid mode (%c)\n", mode);
-			fprintf(stderr, "Try 'kpass --help' for more information.\n");
+			kpass_printf("Kpass: invalid mode (%c)", mode);
+			kpass_printf("Try 'kpass --help' for more information.");
 			retval = RETERR;
 			break;
 	};
@@ -223,14 +219,14 @@ int main(int argc, char **argv)
 	do {
 		retval = parse_cmdline(argc, argv);
 		if (retval != RETSXS) {
-			fprintf(stderr, "Kpass: failed to parse command line.\n");
+			kpass_printf("Kpass: failed to parse command line.");
 			retval = RETERR;
 			break;
 		}
 
 		retval = kpass_init();
 		if (retval != RETSXS) {
-			logit("%s", "kpass_init() failed");
+			kpass_error("failed to init kpass");
 			break;
 		}
 

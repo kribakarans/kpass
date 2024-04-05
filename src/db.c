@@ -62,7 +62,7 @@ static int kpass_db_check(const char *path)
 		return_if_null(path);
 
 		if (sqlite3_open(path, &db) != SQLITE_OK) {
-			logit("sqlite3_open() failed: %s", sqlite3_errmsg(db));
+			kpass_error("sqlite3_open() failed: %s", sqlite3_errmsg(db));
 			sqlite3_close(db);
 			retval = RETERR;
 			break;
@@ -70,7 +70,7 @@ static int kpass_db_check(const char *path)
 
 		query = "PRAGMA integrity_check;";
 		if (sqlite3_exec(db, query, cb_dbcheck, NULL, &err) != SQLITE_OK) {
-			logit("sqlite3_exec() failed: %s", err);
+			kpass_error("sqlite3_exec() failed: %s", err);
 			sqlite3_free(err);
 			sqlite3_close(db);
 			retval = RETERR;
@@ -118,7 +118,7 @@ int kpass_db_init(const char *path)
 		}
 
 		if (sqlite3_open(path, &db) != SQLITE_OK) {
-			logit("sqlite3_open() failed: %s", sqlite3_errmsg(db));
+			kpass_error("sqlite3_open() failed: %s", sqlite3_errmsg(db));
 			sqlite3_close(db);
 			retval = RETERR;
 			break;
@@ -134,7 +134,7 @@ int kpass_db_init(const char *path)
 		        "NOTES     TEXT, "
 		        "TIMESTAMP DATE DEFAULT (datetime('now','localtime')));";
 		if (sqlite3_exec(db, query, NULL, NULL, &err) != SQLITE_OK) {
-			logit("sqlite3_exec() failed: %s", err);
+			kpass_error("sqlite3_exec() failed: %s", err);
 			sqlite3_free(err);
 			sqlite3_close(db);
 			retval = RETERR;
@@ -168,25 +168,25 @@ sqlite3 *kpass_db_open(const char *path)
 
 	do {
 		if (path == NULL) {
-			logit("%s", "invalid database path");
+			kpass_error("invalid database path");
 			retval = NULL;
 			break;
 		}
 
 		if (access(path, F_OK|R_OK|W_OK) != RETSXS) {
-			logit("database is not exist: %s", path);
+			kpass_error("database is not exist: %s", path);
 			retval = NULL;
 			break;
 		}
 
 		if (kpass_db_check(path) != RETSXS) {
-			logit("%s", "database is corrupted");
+			kpass_error("database is corrupted");
 			retval = NULL;
 			break;
 		}
 
 		if (sqlite3_open(path, &db) != SQLITE_OK) {
-			logit("sqlite3_open() failed: %s", sqlite3_errmsg(db));
+			kpass_error("sqlite3_open() failed: %s", sqlite3_errmsg(db));
 			sqlite3_close(db);
 			retval = NULL;
 			break;
@@ -231,7 +231,7 @@ int kpass_db_commit(char *fmt, ...)
 
 		query = sqlite3_vmprintf(fmt, ap);
 		if (query == NULL) {
-			logit("sqlite3_vmprintf() failed: failed to allocate memory for sql statement (%s)", sqlite3_errmsg(kpass.db));
+			kpass_error("sqlite3_vmprintf() failed: failed to allocate memory for sql statement (%s)", sqlite3_errmsg(kpass.db));
 			retval = RETERR;
 			break;
 		}
@@ -241,7 +241,7 @@ int kpass_db_commit(char *fmt, ...)
 
 		retval = sqlite3_exec(kpass.db, query, NULL, NULL, &err);
 		if (retval != SQLITE_OK) {
-			logit("sqlite3_exec() failed: %s", err);
+			kpass_error("sqlite3_exec() failed: %s", err);
 			sqlite3_free(query);
 			sqlite3_free(err);
 			retval = RETERR;
@@ -281,7 +281,7 @@ int kpass_db_exec(int (*callback)(void*, int, char**, char**), void *arg, char *
 
 		query = sqlite3_vmprintf(fmt, ap);
 		if (query == NULL) {
-			logit("sqlite3_vmprintf() failed: failed to allocate memory for sql statement (%s)", sqlite3_errmsg(kpass.db));
+			kpass_error("sqlite3_vmprintf() failed: failed to allocate memory for sql statement (%s)", sqlite3_errmsg(kpass.db));
 			retval = RETERR;
 			break;
 		}
@@ -291,7 +291,7 @@ int kpass_db_exec(int (*callback)(void*, int, char**, char**), void *arg, char *
 
 		retval = sqlite3_exec(kpass.db, query, callback, arg, &err);
 		if (retval != SQLITE_OK) {
-			logit("sqlite3_exec() failed: %s", err);
+			kpass_error("sqlite3_exec() failed: %s", err);
 			sqlite3_free(query);
 			sqlite3_free(err);
 			retval = RETERR;
@@ -340,7 +340,7 @@ int kpass_db_count(char *fmt, ...)
 
 		query = sqlite3_vmprintf(fmt, ap);
 		if (query == NULL) {
-			logit("sqlite3_vmprintf() failed: failed to allocate memory for sql statement (%s)", sqlite3_errmsg(kpass.db));
+			kpass_error("sqlite3_vmprintf() failed: failed to allocate memory for sql statement (%s)", sqlite3_errmsg(kpass.db));
 			retval = RETERR;
 			break;
 		}
@@ -350,7 +350,7 @@ int kpass_db_count(char *fmt, ...)
 
 		retval = sqlite3_exec(kpass.db, query, cb_dbcount, &nitems, &err);
 		if (retval != SQLITE_OK) {
-			logit("sqlite3_exec() failed: %s", err);
+			kpass_error("sqlite3_exec() failed: %s", err);
 			sqlite3_free(query);
 			sqlite3_free(err);
 			retval = RETERR;
