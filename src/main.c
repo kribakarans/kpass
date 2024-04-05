@@ -1,4 +1,3 @@
-#include <libgen.h>
 #include <getopt.h>
 
 #include "kpass.h"
@@ -54,10 +53,10 @@ kpass_mode_t kpass_mode[] = {
 	{ LIST_ENTRIES, "list-entries" },
 	{ IMPORT,       "import"       },
 	{ EXPORT,       "exprt"        },
-	{ 0,             NULL          }
+	{ 0,            "unknown"      }
 };
 
-static char *kpass_get_modename(const char mode)
+static char *strmode(const char mode)
 {
 	int i = 0;
 
@@ -67,7 +66,7 @@ static char *kpass_get_modename(const char mode)
 		}
 	}
 
-	return "unknown";
+	return "other";
 }
 
 /* Exit if mode already set */
@@ -77,8 +76,7 @@ static void exit_if_redundant_mode(const char new_mode)
 
 	if (ex_mode) {
 		kpass_printf("Kpass: multiple operations selected (%s & %s)",
-		                                 kpass_get_modename(ex_mode),
-		                               kpass_get_modename(new_mode));
+		                        strmode(ex_mode), strmode(new_mode));
 		exit(RETERR);
 	}
 
@@ -124,13 +122,21 @@ int parse_cmdline(int argc, char **argv)
 				}
 				break;
 
+			case DATABASE:
+				exit_if_redundant_mode(option);
+				kpass.dbfile = optarg;
+				kpass.mode = option;
+				break;
+
 			case IMPORT:
 				exit_if_redundant_mode(option);
+				kpass.passwdfile = optarg;
 				kpass.mode = option;
 				break;
 
 			case EXPORT:
 				exit_if_redundant_mode(option);
+				kpass.passwdfile = optarg;
 				kpass.mode = option;
 				break;
 
@@ -195,11 +201,11 @@ static int kpass_worker(const char mode)
 			break;
 
 		case IMPORT:
-			kpass_printf("Need to implement (%s)", kpass_get_modename(mode));
+			retval = kpass_import(kpass.passwdfile);
 			break;
 
 		case EXPORT:
-			kpass_printf("Need to implement (%s)", kpass_get_modename(mode));
+			kpass_printf("Need to implement (%s)", strmode(mode));
 			break;
 
 		default:
@@ -210,6 +216,18 @@ static int kpass_worker(const char mode)
 	};
 
 	return retval;
+}
+
+void kpass_print_opts(void)
+{
+	logit("dbcon      : %p", kpass.db);
+	logit("mode       : %s", strmode(kpass.mode));
+	logit("debug      : %s", strbool(kpass.debug));
+	logit("cleartext  : %s", strbool(kpass.cleartext));
+	logit("dbfile     : %s", kpass.dbfile);
+	logit("passwdfile : %s", kpass.passwdfile);
+
+	return;
 }
 
 int main(int argc, char **argv)
@@ -229,6 +247,8 @@ int main(int argc, char **argv)
 			kpass_error("failed to init kpass");
 			break;
 		}
+
+		kpass_print_opts();
 
 		if (kpass.mode)
 			retval = kpass_worker(kpass.mode);

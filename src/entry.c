@@ -281,7 +281,7 @@ int kpass_add_entry(void)
 
 static int cb_print_entry(void *data, int ncolumn, char **column_value, char **column_name)
 {
-	int show_password = *(int *)data;
+	int cleartext = *(int *)data;
 
 	kpass_printf("=====================================================================");
 	kpass_printf("Id       : %s", column_value[0]);
@@ -289,7 +289,7 @@ static int cb_print_entry(void *data, int ncolumn, char **column_value, char **c
 	kpass_printf("Name     : %s", column_value[2]);
 	kpass_printf("User     : %s", column_value[3]);
 
-	if (show_password == 1) {
+	if (cleartext == 1) {
 		kpass_printf("Password : %s", column_value[4]);
 	} else {
 		kpass_printf("Password : **********");
@@ -312,7 +312,7 @@ int kpass_list_entry(const int id)
 		return_if_invalid_id(id);
 		return_if_entry_not_exists(id);
 
-		retval = kpass_db_exec(cb_print_entry, &kpass.show_password, "SELECT * from KPASS_ENTRIES where ID = %d", id);
+		retval = kpass_db_exec(cb_print_entry, &kpass.cleartext, "SELECT * from KPASS_ENTRIES where ID = %d", id);
 	} while(0);
 
 	return retval;
@@ -322,7 +322,7 @@ int kpass_list_entries(void)
 {
 	int  retval = -1;
 
-	retval = kpass_db_exec(cb_print_entry, &kpass.show_password, "SELECT * from KPASS_ENTRIES");
+	retval = kpass_db_exec(cb_print_entry, &kpass.cleartext, "SELECT * from KPASS_ENTRIES");
 
 	return retval;
 }
@@ -356,8 +356,7 @@ int kpass_grep_entries(const char *pattern)
 			break;
 		}
 
-		retval = kpass_db_exec(cb_print_entry,
-		                       &kpass.show_password,
+		retval = kpass_db_exec(cb_print_entry, &kpass.cleartext,
 		                       "SELECT * from KPASS_ENTRIES where"
 		                                      " TAG like '%%%q%%'"
 		                                    " or ID like '%%%q%%'"

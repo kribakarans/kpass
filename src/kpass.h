@@ -12,18 +12,20 @@ typedef struct kpass_st {
 	char   mode;
 	int   debug;
 	sqlite3 *db;
+	char *dbfile;
 	char *pattern;
-	int show_password;
+	int cleartext;
+	char *passwdfile;
 } kpass_t;
 
 extern kpass_t kpass;
 
-enum kpass_err_t {
+enum e_kpass_err {
 	RETERR = -1,
 	RETSXS =  0,
 };
 
-enum kpass_limits_t {
+enum e_kpass_limits {
 	USERNAME_LEN  = 64,
 	PASSWD_LEN    = 64,
 	TAG_LEN       = 64,
@@ -48,6 +50,7 @@ int kpass_add_entry(void);
 int kpass_list_entries(void);
 int kpass_list_entry(const int id);
 int kpass_edit_entry(const int id);
+int kpass_import(const char *file);
 int kpass_delete_entry(const int id);
 int kpass_grep_entries(const char *pattern);
 

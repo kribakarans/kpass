@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include "kpass.h"
+
 #define return_if_null(x) \
 	do { \
 		if (x == NULL) { \

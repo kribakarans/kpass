@@ -7,7 +7,7 @@ TARGET   :=  $(ELFNAME).out
 
 # Build options
 CC       ?=  gcc
-CFLAGS   := -g -MMD -Wall #-Wextra
+CFLAGS   := -g -MMD -Wall -Wno-unused-function -Werror #-Wextra
 CPPFLAGS :=
 INCLUDE  :=
 LDLIBS   += -pthread -lcrypto -lsqlite3
@@ -22,7 +22,7 @@ BOLD     :=  $(shell tput bold)
 NC       :=  $(shell tput sgr0)
 
 # Source files
-SRCS :=  $(SRCDIR)/main.c $(SRCDIR)/db.c $(SRCDIR)/entry.c $(SRCDIR)/utils.c
+SRCS :=  $(SRCDIR)/main.c $(SRCDIR)/db.c $(SRCDIR)/entry.c $(SRCDIR)/import.c $(SRCDIR)/kpass.c $(SRCDIR)/utils.c $(SRCDIR)/vendor.c
 
 # Build object files
 OBJS  = $(SRCS:%.c=$(OBJDIR)/%.o)

@@ -97,4 +97,9 @@ bool kpass_user_action(void)
 	return false;
 }
 
+char *strbool(const int val)
+{
+	return (val == 1) ? "true" : "false";
+}
+
 /* EOF */
