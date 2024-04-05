@@ -335,12 +335,13 @@ int kpass_grep_entries(const char *pattern)
 		logit("%s", pattern);
 
 		retval = kpass_db_count("SELECT count(*) from KPASS_ENTRIES where"
-		                                               " ID like '%%%q%%'"
+		                                              " TAG like '%%%q%%'"
+		                                            " or ID like '%%%q%%'"
 		                                          " or NAME like '%%%q%%'"
 		                                      " or USERNAME like '%%%q%%'"
 		                                           " or URL like '%%%q%%'"
 		                                         " or NOTES like '%%%q%%'",
-		                      pattern, pattern, pattern, pattern, pattern);
+		             pattern, pattern, pattern, pattern, pattern, pattern);
 
 		logit("nitems: %d", retval);
 		if (retval == RETERR) {
@@ -358,12 +359,13 @@ int kpass_grep_entries(const char *pattern)
 		retval = kpass_db_exec(cb_print_entry,
 		                       &kpass.show_password,
 		                       "SELECT * from KPASS_ENTRIES where"
-		                                       " ID like '%%%q%%'"
+		                                      " TAG like '%%%q%%'"
+		                                    " or ID like '%%%q%%'"
 		                                  " or NAME like '%%%q%%'"
 		                              " or USERNAME like '%%%q%%'"
 		                                   " or URL like '%%%q%%'"
 		                                 " or NOTES like '%%%q%%'",
-		              pattern, pattern, pattern, pattern, pattern);
+		     pattern, pattern, pattern, pattern, pattern, pattern);
 	} while(0);
 
 	return retval;
