@@ -3,12 +3,14 @@
 #include "kpass.h"
 #include "logit.h"
 
+int debug_database = 1;
+
 /**
  * Description:
  *   Check sqlite3 database integrity
  *
  * SQLite3 exec callback format:
- *   int callback(void* data, int num_columns, char** column_values, char** column_names);
+ *   int callback(void* data, int num_columns, char** column_value, char** column_name);
  *
  * Parameters:
  *   @data         : The pointer to the data that was passed as the data parameter of sqlite3_exec
@@ -174,7 +176,7 @@ sqlite3 *kpass_db_open(const char *path)
 		}
 
 		if (access(path, F_OK|R_OK|W_OK) != RETSXS) {
-			kpass_error("database is not exist: %s", path);
+			kpass_error("access() failed: %s (%s)", path, strerror(errno));
 			retval = NULL;
 			break;
 		}
@@ -236,7 +238,7 @@ int kpass_db_commit(char *fmt, ...)
 			break;
 		}
 
-		logit("%s", query);
+		dblog("%s", query);
 		va_end(ap);
 
 		retval = sqlite3_exec(kpass.db, query, NULL, NULL, &err);
@@ -249,7 +251,7 @@ int kpass_db_commit(char *fmt, ...)
 		}
 
 		nitems = sqlite3_changes(kpass.db);
-		logit("affected %d rows", nitems);
+		dblog("affected %d rows", nitems);
 		sqlite3_free(query);
 
 		retval = nitems;
@@ -286,7 +288,7 @@ int kpass_db_exec(int (*callback)(void*, int, char**, char**), void *arg, char *
 			break;
 		}
 
-		logit("%s", query);
+		dblog("%s", query);
 		va_end(ap);
 
 		retval = sqlite3_exec(kpass.db, query, callback, arg, &err);
@@ -309,11 +311,11 @@ int kpass_db_exec(int (*callback)(void*, int, char**, char**), void *arg, char *
 /**
  * Callback of db_count()
  */
-static int cb_dbcount(void *data, int argc, char **argv, char **cname)
+static int cb_dbcount(void *data, int ncolumn, char **column_value, char **column_name)
 {
     int *nrows = (int *)data;
 
-    *nrows = atoi(argv[0]);
+    *nrows = atoi(column_value[0]);
 
     return 0;
 }

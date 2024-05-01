@@ -30,6 +30,16 @@
 		} \
 	} while(0);
 
+#define dblog(...) \
+	do { \
+		if (debug_database) { \
+			fprintf(stderr, "DEBUG %d %17s:%-4d %25s() :: ", \
+			        getpid(), __FILE__, __LINE__, __func__); \
+			fprintf(stderr, __VA_ARGS__); \
+			fprintf(stderr, "\n"); \
+		} \
+	} while(0);
+
 #define kpass_error(...) \
 	do { \
 		fprintf(stderr, "ERROR %d %17s:%-4d %25s() :: ", \

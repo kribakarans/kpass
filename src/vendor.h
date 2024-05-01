@@ -15,6 +15,6 @@ enum e_vendors {
 };
 
 char *strvendor(const int id);
-int kpass_find_vendor(const char *file);
+int kpass_get_vendor(const char *file);
 
 #endif

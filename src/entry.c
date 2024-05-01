@@ -27,7 +27,7 @@
 		} \
 	} while(0);
 
-static kpass_entry_t *kpass_entry_init(void)
+kpass_entry_t *kpass_entry_init(void)
 {
 	kpass_entry_t *entry = NULL;
 
@@ -40,7 +40,7 @@ static kpass_entry_t *kpass_entry_init(void)
 	return entry;
 }
 
-static void kpass_entry_free(kpass_entry_t *entry)
+void kpass_entry_free(kpass_entry_t *entry)
 {
 	if (entry)
 		free(entry);
@@ -48,7 +48,7 @@ static void kpass_entry_free(kpass_entry_t *entry)
 	return;
 }
 
-static void kpass_print_entry(kpass_entry_t *entry)
+void kpass_print_entry(kpass_entry_t *entry)
 {
 	if (entry == NULL) {
 		kpass_error("%s", "entry is NULL");
@@ -96,7 +96,7 @@ static int kpass_entry_set(const char *name, char *object, size_t size)
 	return retval;
 }
 
-static int kpass_insert_entry(kpass_entry_t *entry)
+int kpass_insert_entry(kpass_entry_t *entry)
 {
 	int  retval = -1;
 
@@ -134,6 +134,37 @@ static int cb_get_entry(void *data, int ncolumn, char **column_value, char **col
 	strcpy(entry->stamp,    column_value[7]);
 
 	return RETSXS;
+}
+
+int kpass_update_entry(int id, kpass_entry_t *entry)
+{
+	int retval = -1;
+
+	do {
+		return_if_null(entry);
+
+		retval = kpass_db_commit("UPDATE KPASS_ENTRIES set "
+		                         "NAME = '%q', "
+		                         "USERNAME ='%q', "
+		                         "PASSWORD = '%q', "
+		                         "URL = '%q', "
+		                         "NOTES = '%q', "
+		                         "TIMESTAMP = datetime('now', 'localtime') where ID = %d",
+		                         entry->name,
+		                         entry->user,
+		                         entry->password,
+		                         entry->url,
+		                         entry->notes, id);
+		if (retval <= 0) {
+			kpass_error("%s", "failed to update entry");
+			retval = RETERR;
+			break;
+		}
+	} while(0);
+
+	logit_retval();
+
+	return retval;
 }
 
 int kpass_edit_entry(const int id)
@@ -365,6 +396,37 @@ int kpass_grep_entries(const char *pattern)
 		                                   " or URL like '%%%q%%'"
 		                                 " or NOTES like '%%%q%%'",
 		     pattern, pattern, pattern, pattern, pattern, pattern);
+	} while(0);
+
+	return retval;
+}
+
+static int cb_get_entry_id(void *data, int ncolumn, char **column_value, char **column_name)
+{
+	int *entry_id = (int *)data;
+
+	*entry_id = atoi(column_value[0]);
+
+	return 0;
+}
+
+int kpass_get_entry_id(kpass_entry_t *entry)
+{
+	int id = -1;
+	int retval = -1;
+
+	do {
+		return_if_null(entry);
+
+		retval = kpass_db_exec(cb_get_entry_id, &id,
+		                       "SELECT ID from KPASS_ENTRIES where"
+		                                             " NAME = '%q'"
+		                                     " and USERNAME = '%q'"
+		                                          " and URL = '%q'",
+		                      entry->name, entry->user, entry->url);
+
+		logit("id=%d", id);
+		retval = id;
 	} while(0);
 
 	return retval;

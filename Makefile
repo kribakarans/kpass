@@ -7,7 +7,7 @@ TARGET   :=  $(ELFNAME).out
 
 # Build options
 CC       ?=  gcc
-CFLAGS   := -g -MMD -Wall -Wno-unused-function -Werror #-Wextra
+CFLAGS   := -g -MMD -Wall -Wno-unused-function #-Werror #-Wextra
 CPPFLAGS :=
 INCLUDE  :=
 LDLIBS   += -pthread -lcrypto -lsqlite3

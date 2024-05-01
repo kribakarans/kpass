@@ -242,6 +242,8 @@ int main(int argc, char **argv)
 			break;
 		}
 
+		kpass.debug = true;
+
 		retval = kpass_init();
 		if (retval != RETSXS) {
 			kpass_error("failed to init kpass");
