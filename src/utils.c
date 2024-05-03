@@ -12,15 +12,19 @@ void kpass_exit(void)
 
 	logit("%s", "bye");
 
+	logit_close();
+
 	return;
 }
 
 int kpass_init(void)
 {
 	int retval = -1;
-	const char *dbpath = "kpass.db";
+	const char *dbpath = KPASSDB;
 
 	do {
+		logit_init();
+
 		logit("%s", "hello");
 
 		atexit(&kpass_exit);

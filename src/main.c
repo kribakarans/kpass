@@ -3,6 +3,7 @@
 #include "kpass.h"
 #include "logit.h"
 #include "utils.h"
+#include "config.h"
 
 kpass_t kpass;
 
